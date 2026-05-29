@@ -1,6 +1,6 @@
 # Binaries
 /bin/
-openbeats
+/openbeats
 *.exe
 *.test
 *.out
