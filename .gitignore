@@ -23,7 +23,7 @@ npm-debug.log*
 
 # Local audio storage / persistent volume contents
 /data/
-storage/
+/storage/
 *.mp3
 *.flac
 *.m4a
