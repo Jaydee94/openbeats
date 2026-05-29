@@ -1,0 +1,96 @@
+# Default values for the OpenBeats Helm chart.
+
+nameOverride: ""
+fullnameOverride: ""
+
+api:
+  image:
+    repository: ghcr.io/jaydee94/openbeats-api
+    tag: "" # defaults to .Chart.AppVersion
+    pullPolicy: IfNotPresent
+  replicas: 1
+  port: 8080
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: "1"
+      memory: 512Mi
+  # JWT lifetime and CORS are non-sensitive runtime config (ConfigMap).
+  jwtTTL: "24h"
+  corsOrigins: "*"
+
+web:
+  image:
+    repository: ghcr.io/jaydee94/openbeats-web
+    tag: "" # defaults to .Chart.AppVersion
+    pullPolicy: IfNotPresent
+  replicas: 1
+  port: 80
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi
+
+# Persistent volume for uploaded audio + extracted cover art.
+storage:
+  size: 20Gi
+  storageClassName: "" # "" uses the cluster default
+  accessMode: ReadWriteOnce
+  mountPath: /data
+
+# Probes hit the API /healthz liveness endpoint.
+probes:
+  liveness:
+    initialDelaySeconds: 10
+    periodSeconds: 10
+  readiness:
+    initialDelaySeconds: 5
+    periodSeconds: 10
+
+# Secrets. Provide real values via --set or a sealed/external secret. If
+# jwtSecret is empty the chart generates a random one on first install.
+secrets:
+  jwtSecret: ""
+  # Bootstrap admin account created on first start when no users exist.
+  adminUsername: "admin"
+  adminPassword: "changeme"
+
+# Bundled PostgreSQL. Decision: a simple in-chart StatefulSet (no Bitnami
+# dependency) keeps the chart self-contained and offline-installable. For
+# production you may prefer a managed database — set postgresql.enabled=false
+# and point externalDatabase.url at it.
+postgresql:
+  enabled: true
+  image: postgres:16-alpine
+  database: openbeats
+  username: openbeats
+  password: openbeats
+  storage:
+    size: 10Gi
+    storageClassName: ""
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: "1"
+      memory: 512Mi
+
+externalDatabase:
+  # Used only when postgresql.enabled=false. Full pgx/libpq connection string.
+  url: ""
+
+ingress:
+  enabled: false
+  className: nginx
+  host: openbeats.example.com
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+  tls:
+    enabled: true
+    secretName: openbeats-tls

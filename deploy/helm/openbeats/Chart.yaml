@@ -1,0 +1,15 @@
+apiVersion: v2
+name: openbeats
+description: Self-hosted music streaming platform (Go API + React web UI)
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+keywords:
+  - music
+  - streaming
+  - self-hosted
+home: https://github.com/jaydee94/openbeats
+sources:
+  - https://github.com/jaydee94/openbeats
+maintainers:
+  - name: jaydee94

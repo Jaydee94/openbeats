@@ -1,0 +1,25 @@
+OpenBeats has been deployed.
+
+API:  {{ include "openbeats.apiName" . }} (port {{ .Values.api.port }})
+Web:  {{ include "openbeats.webName" . }} (port {{ .Values.web.port }})
+{{- if .Values.postgresql.enabled }}
+DB:   {{ include "openbeats.postgresName" . }} (bundled StatefulSet)
+{{- else }}
+DB:   external ({{ .Values.externalDatabase.url | default "UNSET — set externalDatabase.url" }})
+{{- end }}
+
+{{- if .Values.ingress.enabled }}
+Open: https://{{ .Values.ingress.host }}
+{{- else }}
+No ingress is enabled. Port-forward to try it locally:
+  kubectl port-forward svc/{{ include "openbeats.webName" . }} 8080:{{ .Values.web.port }}
+Then open http://localhost:8080
+{{- end }}
+
+Bootstrap admin (set via values.secrets):
+  username: {{ .Values.secrets.adminUsername }}
+
+IMPORTANT: set secrets.jwtSecret and secrets.adminPassword for production.
+A random JWT secret is generated on first install if you leave it empty, but it
+will be regenerated on `helm upgrade` (invalidating existing tokens) unless you
+pin it explicitly.
