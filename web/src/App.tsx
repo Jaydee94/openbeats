@@ -1,4 +1,4 @@
-import { Link, Navigate, Route, Routes, useLocation } from "react-router-dom";
+import { NavLink, Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { Player } from "./components/Player";
 import { Library } from "./pages/Library";
 import { Login } from "./pages/Login";
@@ -18,9 +18,13 @@ function Shell({ children }: { children: React.ReactNode }) {
   return (
     <div className="app">
       <nav className="topnav">
-        <span className="brand">OpenBeats</span>
-        <Link to="/">Library</Link>
-        <Link to="/playlists">Playlists</Link>
+        <span className="brand">
+          <img src="/logo.svg" alt="OpenBeats" height={28} />
+        </span>
+        <NavLink to="/" end>
+          Library
+        </NavLink>
+        <NavLink to="/playlists">Playlists</NavLink>
         <span className="spacer" />
         {user && <span className="user">{user.username}</span>}
         <button onClick={logout}>Logout</button>

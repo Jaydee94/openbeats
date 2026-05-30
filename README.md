@@ -1,4 +1,8 @@
-# OpenBeats
+<p align="center">
+  <img src="docs/assets/openbeats-banner.svg" alt="OpenBeats" width="440" />
+</p>
+
+<p align="center"><em>Self-hosted music streaming — your library, your server.</em></p>
 
 OpenBeats is a **self-hosted music streaming platform**. Upload your audio
 library, let OpenBeats read the ID3 tags and cover art, and stream it to a

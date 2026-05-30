@@ -33,7 +33,7 @@ export function Login() {
   return (
     <div className="login">
       <form className="login__card" onSubmit={submit}>
-        <h1>OpenBeats</h1>
+        <img className="login__logo" src="/logo.svg" alt="OpenBeats" />
         <input
           placeholder="Username"
           value={username}
