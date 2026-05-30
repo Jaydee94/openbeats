@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { mediaUrl } from "../api/client";
 import { usePlayerStore } from "../store/player";
+import { isVideo } from "../utils/media";
 
 function fmt(seconds: number): string {
   if (!isFinite(seconds) || seconds < 0) return "0:00";
@@ -10,7 +11,7 @@ function fmt(seconds: number): string {
 }
 
 export function Player() {
-  const audioRef = useRef<HTMLAudioElement>(null);
+  const mediaRef = useRef<HTMLMediaElement>(null);
   const queue = usePlayerStore((s) => s.queue);
   const index = usePlayerStore((s) => s.index);
   const isPlaying = usePlayerStore((s) => s.isPlaying);
@@ -25,7 +26,7 @@ export function Player() {
 
   // Load a new source whenever the current track changes.
   useEffect(() => {
-    const el = audioRef.current;
+    const el = mediaRef.current;
     if (!el || !track) return;
     el.src = mediaUrl(`/api/tracks/${track.id}/stream`);
     el.load();
@@ -35,7 +36,7 @@ export function Player() {
 
   // React to play/pause state changes.
   useEffect(() => {
-    const el = audioRef.current;
+    const el = mediaRef.current;
     if (!el || !track) return;
     if (isPlaying) void el.play().catch(() => setPlaying(false));
     else el.pause();
@@ -43,7 +44,7 @@ export function Player() {
   }, [isPlaying]);
 
   useEffect(() => {
-    if (audioRef.current) audioRef.current.volume = volume;
+    if (mediaRef.current) mediaRef.current.volume = volume;
   }, [volume]);
 
   if (!track) {
@@ -54,16 +55,24 @@ export function Player() {
     );
   }
 
+  const mediaProps = {
+    ref: mediaRef as React.RefObject<HTMLVideoElement & HTMLAudioElement>,
+    onTimeUpdate: (e: React.SyntheticEvent<HTMLMediaElement>) =>
+      setCurrent(e.currentTarget.currentTime),
+    onLoadedMetadata: (e: React.SyntheticEvent<HTMLMediaElement>) =>
+      setDuration(e.currentTarget.duration),
+    onEnded: () => next(),
+    onPlay: () => setPlaying(true),
+    onPause: () => setPlaying(false),
+  };
+
   return (
     <footer className="player">
-      <audio
-        ref={audioRef}
-        onTimeUpdate={(e) => setCurrent(e.currentTarget.currentTime)}
-        onLoadedMetadata={(e) => setDuration(e.currentTarget.duration)}
-        onEnded={() => next()}
-        onPlay={() => setPlaying(true)}
-        onPause={() => setPlaying(false)}
-      />
+      {isVideo(track.mime_type) ? (
+        <video {...mediaProps} controls className="player__video" />
+      ) : (
+        <audio {...mediaProps} />
+      )}
 
       <div className="player__meta">
         <strong>{track.title}</strong>
@@ -88,7 +97,7 @@ export function Player() {
           value={current}
           onChange={(e) => {
             const t = Number(e.target.value);
-            if (audioRef.current) audioRef.current.currentTime = t;
+            if (mediaRef.current) mediaRef.current.currentTime = t;
             setCurrent(t);
           }}
         />
