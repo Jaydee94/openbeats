@@ -7,7 +7,7 @@ SQLC_VER    := v1.27.0
 MIGRATE_VER := v4.18.1
 DATABASE_URL ?= postgres://openbeats:openbeats@localhost:5432/openbeats?sslmode=disable
 
-.PHONY: help build run test migrate sqlc docker-build dev tidy
+.PHONY: help build run test migrate sqlc docker-build dev stop tidy
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
@@ -37,4 +37,15 @@ docker-build: ## Build the api and web Docker images
 	docker build -t openbeats-web:latest ./web
 
 dev: ## Start the full local stack with docker-compose
-	docker compose up --build
+	docker buildx use default
+	docker compose up --build -d
+	@echo ""
+	@echo "  OpenBeats is running"
+	@echo "  Web  →  http://localhost:3000"
+	@echo "  API  →  http://localhost:8081"
+	@echo "  Login: admin / admin"
+	@echo ""
+	@echo "  Stop with: make stop"
+
+stop: ## Stop the local stack (volumes are preserved)
+	docker compose down

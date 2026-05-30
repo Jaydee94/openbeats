@@ -23,18 +23,18 @@ services:
       postgres:
         condition: service_healthy
     environment:
-      PORT: "8080"
+      PORT: "8090"
       DATABASE_URL: "postgres://openbeats:openbeats@postgres:5432/openbeats?sslmode=disable"
       JWT_SECRET: "${JWT_SECRET:-dev-secret-change-me}"
       JWT_TTL: "24h"
       STORAGE_PATH: "/data"
       ADMIN_USERNAME: "${ADMIN_USERNAME:-admin}"
-      ADMIN_PASSWORD: "${ADMIN_PASSWORD:-changeme}"
+      ADMIN_PASSWORD: "${ADMIN_PASSWORD:-admin}"
       CORS_ORIGINS: "*"
     volumes:
       - audio:/data
     ports:
-      - "8080:8080"
+      - "8081:8090"
 
   web:
     build:
