@@ -1,8 +1,19 @@
-import { NavLink, Navigate, Route, Routes, useLocation } from "react-router-dom";
-import { Player } from "./components/Player";
+import { useState } from "react";
+import { Navigate, Outlet, Route, Routes, useLocation } from "react-router-dom";
+import { Sidebar } from "./design/Sidebar";
+import { TopBar } from "./design/TopBar";
+import { PlayerBar } from "./design/PlayerBar";
+import { NowPlaying } from "./design/NowPlaying";
+import { UploadDialog } from "./components/UploadDialog";
+import { CreatePlaylistDialog } from "./components/CreatePlaylistDialog";
+import { Home } from "./pages/Home";
 import { Library } from "./pages/Library";
+import { Search } from "./pages/Search";
+import { AlbumView, PlaylistView } from "./pages/Collection";
 import { Login } from "./pages/Login";
-import { Playlists } from "./pages/Playlists";
+import { usePlaylists } from "./hooks/usePlaylists";
+import { useLibrary } from "./hooks/useLibrary";
+import { usePlayerStore } from "./store/player";
 import { useAuthStore } from "./store/auth";
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
@@ -12,25 +23,38 @@ function RequireAuth({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-function Shell({ children }: { children: React.ReactNode }) {
-  const user = useAuthStore((s) => s.user);
-  const logout = useAuthStore((s) => s.logout);
+// Cosmetic storage gauge: total runtime against a nominal 50-hour shelf.
+function storagePercent(totalSeconds: number): number {
+  return Math.min(100, (totalSeconds / (50 * 3600)) * 100);
+}
+
+function Shell() {
+  const [query, setQuery] = useState("");
+  const [showUpload, setShowUpload] = useState(false);
+  const [showCreate, setShowCreate] = useState(false);
+  const { data: playlists } = usePlaylists();
+  const { tracks } = useLibrary();
+  const npOpen = usePlayerStore((s) => s.npOpen);
+  const hasTrack = usePlayerStore((s) => s.queue.length > 0);
+
+  const totalSeconds = tracks.reduce((sum, t) => sum + t.duration_seconds, 0);
+
   return (
     <div className="app">
-      <nav className="topnav">
-        <span className="brand">
-          <img src="/logo.svg" alt="OpenBeats" height={28} />
-        </span>
-        <NavLink to="/" end>
-          Library
-        </NavLink>
-        <NavLink to="/playlists">Playlists</NavLink>
-        <span className="spacer" />
-        {user && <span className="user">{user.username}</span>}
-        <button onClick={logout}>Logout</button>
-      </nav>
-      <main className="content">{children}</main>
-      <Player />
+      <Sidebar
+        playlists={playlists ?? []}
+        storagePct={storagePercent(totalSeconds)}
+        onNewPlaylist={() => setShowCreate(true)}
+      />
+      <main className="main">
+        <TopBar query={query} onQueryChange={setQuery} onUpload={() => setShowUpload(true)} />
+        <Outlet context={{ query }} />
+      </main>
+      <PlayerBar />
+
+      {npOpen && hasTrack && <NowPlaying />}
+      {showUpload && <UploadDialog onClose={() => setShowUpload(false)} />}
+      {showCreate && <CreatePlaylistDialog onClose={() => setShowCreate(false)} />}
     </div>
   );
 }
@@ -40,25 +64,18 @@ export default function App() {
     <Routes>
       <Route path="/login" element={<Login />} />
       <Route
-        path="/"
         element={
           <RequireAuth>
-            <Shell>
-              <Library />
-            </Shell>
+            <Shell />
           </RequireAuth>
         }
-      />
-      <Route
-        path="/playlists"
-        element={
-          <RequireAuth>
-            <Shell>
-              <Playlists />
-            </Shell>
-          </RequireAuth>
-        }
-      />
+      >
+        <Route index element={<Home />} />
+        <Route path="/search" element={<Search />} />
+        <Route path="/library" element={<Library />} />
+        <Route path="/album/:id" element={<AlbumView />} />
+        <Route path="/playlist/:id" element={<PlaylistView />} />
+      </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

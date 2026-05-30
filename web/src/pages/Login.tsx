@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { api } from "../api/client";
 import type { LoginResponse } from "../api/types";
 import { useAuthStore } from "../store/auth";
+import { BrandMark } from "../design/Sidebar";
 
 export function Login() {
   const [username, setUsername] = useState("");
@@ -32,22 +33,36 @@ export function Login() {
 
   return (
     <div className="login">
+      <div className="login__bg" />
       <form className="login__card" onSubmit={submit}>
-        <img className="login__logo" src="/logo.svg" alt="OpenBeats" />
-        <input
-          placeholder="Username"
-          value={username}
-          autoFocus
-          onChange={(e) => setUsername(e.target.value)}
-        />
-        <input
-          placeholder="Password"
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        {error && <p className="error">{error}</p>}
-        <button type="submit" disabled={loading}>
+        <div className="login__brand">
+          <BrandMark size={40} glyph={22} />
+          <div className="brand__name" style={{ fontSize: 22 }}>
+            Open<b>Beats</b>
+          </div>
+        </div>
+        <div className="login__title">Welcome back</div>
+        <div className="login__sub">Sign in to your music server.</div>
+        <div className="field">
+          <label htmlFor="login-username">Username</label>
+          <input
+            id="login-username"
+            value={username}
+            autoFocus
+            onChange={(e) => setUsername(e.target.value)}
+          />
+        </div>
+        <div className="field">
+          <label htmlFor="login-password">Password</label>
+          <input
+            id="login-password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+        </div>
+        {error && <p className="login__error">{error}</p>}
+        <button className="login__submit" type="submit" disabled={loading}>
           {loading ? "Signing in…" : "Sign in"}
         </button>
       </form>
