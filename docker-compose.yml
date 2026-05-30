@@ -29,7 +29,7 @@ services:
       JWT_TTL: "24h"
       STORAGE_PATH: "/data"
       ADMIN_USERNAME: "${ADMIN_USERNAME:-admin}"
-      ADMIN_PASSWORD: "${ADMIN_PASSWORD:-changeme}"
+      ADMIN_PASSWORD: "${ADMIN_PASSWORD:-admin}"
       CORS_ORIGINS: "*"
     volumes:
       - audio:/data
