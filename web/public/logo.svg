@@ -1,0 +1,16 @@
+<svg width="196" height="44" viewBox="0 0 196 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="ob-logo-grad" x1="7" y1="6" x2="37" y2="38" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#6366f1"/>
+      <stop offset="1" stop-color="#a855f7"/>
+    </linearGradient>
+  </defs>
+  <circle cx="22" cy="22" r="15" fill="none" stroke="url(#ob-logo-grad)" stroke-width="4"
+          stroke-linecap="round" stroke-dasharray="68 22" transform="rotate(-35 22 22)"/>
+  <path d="M10 22 H16 L19 13 L25 31 L28 15 L31 22 H35" fill="none" stroke="#ffffff"
+        stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="48" y="30" font-family="'Space Grotesk', Inter, system-ui, sans-serif"
+        font-size="22" font-weight="700" letter-spacing="-0.3">
+    <tspan fill="#e8eaf0">Open</tspan><tspan fill="#8b5cf6">Beats</tspan>
+  </text>
+</svg>
