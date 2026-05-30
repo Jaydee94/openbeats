@@ -17,4 +17,10 @@ describe('isVideo', () => {
   it('returns false for empty string', () => {
     expect(isVideo('')).toBe(false);
   });
+  it('returns false for mixed-case Video/mp4 (MIME types are always lowercase)', () => {
+    expect(isVideo('Video/mp4')).toBe(false);
+  });
+  it('returns false for VIDEO/MP4', () => {
+    expect(isVideo('VIDEO/MP4')).toBe(false);
+  });
 });
