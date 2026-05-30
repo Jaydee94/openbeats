@@ -38,7 +38,7 @@ docker-build: ## Build the api and web Docker images
 
 dev: ## Start the full local stack with docker-compose
 	docker buildx use default
-	docker compose up --build
+	docker compose up --build -d
 
 stop: ## Stop the local stack (volumes are preserved)
 	docker compose down
