@@ -18,7 +18,7 @@ export function UploadDialog({ onClose }: { onClose: () => void }) {
         <h3>Upload track</h3>
         <input
           type="file"
-          accept="audio/*,.mp3,.flac,.m4a,.ogg"
+          accept="audio/*,video/mp4,.mp3,.flac,.m4a,.ogg,.mp4"
           onChange={(e) => setFile(e.target.files?.[0] ?? null)}
         />
         {upload.isPending && (
