@@ -23,7 +23,7 @@ services:
       postgres:
         condition: service_healthy
     environment:
-      PORT: "8080"
+      PORT: "8090"
       DATABASE_URL: "postgres://openbeats:openbeats@postgres:5432/openbeats?sslmode=disable"
       JWT_SECRET: "${JWT_SECRET:-dev-secret-change-me}"
       JWT_TTL: "24h"
