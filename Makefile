@@ -39,6 +39,13 @@ docker-build: ## Build the api and web Docker images
 dev: ## Start the full local stack with docker-compose
 	docker buildx use default
 	docker compose up --build -d
+	@echo ""
+	@echo "  OpenBeats is running"
+	@echo "  Web  →  http://localhost:3000"
+	@echo "  API  →  http://localhost:8081"
+	@echo "  Login: admin / admin"
+	@echo ""
+	@echo "  Stop with: make stop"
 
 stop: ## Stop the local stack (volumes are preserved)
 	docker compose down
