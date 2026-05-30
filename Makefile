@@ -37,6 +37,7 @@ docker-build: ## Build the api and web Docker images
 	docker build -t openbeats-web:latest ./web
 
 dev: ## Start the full local stack with docker-compose
+	docker buildx use default
 	docker compose up --build
 
 stop: ## Stop the local stack (volumes are preserved)
