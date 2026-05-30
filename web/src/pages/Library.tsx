@@ -1,94 +1,91 @@
 import { useState } from "react";
-import { mediaUrl } from "../api/client";
-import { UploadDialog } from "../components/UploadDialog";
-import { useDeleteTrack, useTracks } from "../hooks/useTracks";
-import { useAddTrackToPlaylist, usePlaylists } from "../hooks/usePlaylists";
+import { useNavigate } from "react-router-dom";
 import { usePlayerStore } from "../store/player";
+import { useLibrary, type Album } from "../hooks/useLibrary";
+import { AlbumCard } from "../design/AlbumCard";
+import { Cover } from "../design/Cover";
 
 export function Library() {
-  const [q, setQ] = useState("");
-  const [showUpload, setShowUpload] = useState(false);
-  const { data: tracks, isLoading } = useTracks({ q: q || undefined });
-  const { data: playlists } = usePlaylists();
+  const [tab, setTab] = useState<"albums" | "artists">("albums");
+  const navigate = useNavigate();
+  const { albums, artists, isLoading } = useLibrary();
   const playQueue = usePlayerStore((s) => s.playQueue);
-  const deleteTrack = useDeleteTrack();
-  const addToPlaylist = useAddTrackToPlaylist();
+
+  const openAlbum = (a: Album) => navigate(`/album/${a.id}`);
+  const playAlbum = (a: Album) => playQueue(a.tracks, 0);
 
   return (
-    <div className="library">
-      <div className="library__toolbar">
-        <input
-          placeholder="Search title, artist, album…"
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-        />
-        <button onClick={() => setShowUpload(true)}>Upload</button>
+    <div className="page fade-in">
+      <div className="section__head" style={{ marginBottom: 22 }}>
+        <h2 className="section__title" style={{ fontSize: 28 }}>
+          Your Library
+        </h2>
+        <div style={{ display: "flex", gap: 6 }}>
+          {(["albums", "artists"] as const).map((k) => (
+            <button
+              key={k}
+              className={"np-tab" + (tab === k ? " active" : "")}
+              onClick={() => setTab(k)}
+              style={{ textTransform: "capitalize" }}
+            >
+              {k}
+            </button>
+          ))}
+        </div>
       </div>
 
-      {isLoading && <p>Loading…</p>}
+      {isLoading && <p className="muted">Loading…</p>}
 
-      <table className="track-table">
-        <thead>
-          <tr>
-            <th></th>
-            <th>Title</th>
-            <th>Artist</th>
-            <th>Album</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          {tracks?.map((t, i) => (
-            <tr key={t.id} onDoubleClick={() => playQueue(tracks, i)}>
-              <td>
-                {t.has_cover ? (
-                  <img
-                    className="cover"
-                    src={mediaUrl(`/api/tracks/${t.id}/cover`)}
-                    alt=""
-                  />
-                ) : (
-                  <div className="cover cover--empty">♪</div>
-                )}
-              </td>
-              <td>{t.title}</td>
-              <td>{t.artist}</td>
-              <td>{t.album}</td>
-              <td className="track-table__actions">
-                <button onClick={() => playQueue(tracks, i)}>▶</button>
-                {playlists && playlists.length > 0 && (
-                  <select
-                    defaultValue=""
-                    onChange={(e) => {
-                      if (e.target.value) {
-                        addToPlaylist.mutate({
-                          playlistId: e.target.value,
-                          trackId: t.id,
-                        });
-                        e.target.value = "";
-                      }
-                    }}
-                  >
-                    <option value="">+ Playlist</option>
-                    {playlists.map((p) => (
-                      <option key={p.id} value={p.id}>
-                        {p.name}
-                      </option>
-                    ))}
-                  </select>
-                )}
-                <button onClick={() => deleteTrack.mutate(t.id)}>🗑</button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-
-      {tracks?.length === 0 && !isLoading && (
-        <p className="empty">No tracks yet. Upload some music to get started.</p>
+      {!isLoading && albums.length === 0 && (
+        <div className="empty-state">
+          <div className="empty-state__title">Nothing here yet</div>
+          Upload music to build out your library.
+        </div>
       )}
 
-      {showUpload && <UploadDialog onClose={() => setShowUpload(false)} />}
+      {tab === "albums" && (
+        <div className="card-grid">
+          {albums.map((a) => (
+            <AlbumCard
+              key={a.id}
+              title={a.title}
+              sub={a.artist}
+              pal={a.pal}
+              motif={a.motif}
+              coverSrc={a.coverSrc}
+              onOpen={() => openAlbum(a)}
+              onPlay={() => playAlbum(a)}
+            />
+          ))}
+        </div>
+      )}
+
+      {tab === "artists" && (
+        <div className="card-grid">
+          {artists.map((artist) => (
+            <div
+              className="card"
+              key={artist.id}
+              onClick={() => artist.albums[0] && openAlbum(artist.albums[0])}
+              style={{ textAlign: "center" }}
+            >
+              <div className="card__art" style={{ borderRadius: "50%", aspectRatio: "1" }}>
+                <Cover
+                  pal={artist.pal}
+                  motif={artist.motif}
+                  style={{ width: "100%", height: "100%", borderRadius: "50%" }}
+                />
+              </div>
+              <div className="card__title" style={{ textAlign: "center" }}>
+                {artist.name}
+              </div>
+              <div className="card__sub" style={{ textAlign: "center" }}>
+                {artist.trackCount} {artist.trackCount === 1 ? "song" : "songs"}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
