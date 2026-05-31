@@ -34,3 +34,6 @@ npm-debug.log*
 .idea/
 .vscode/
 *.swp
+
+# Playwright MCP session artifacts
+web/.playwright-mcp/
