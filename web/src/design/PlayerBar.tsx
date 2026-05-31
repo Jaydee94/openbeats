@@ -3,7 +3,7 @@ import { useEffect, useRef } from "react";
 import { mediaUrl } from "../api/client";
 import { isVideo } from "../utils/media";
 import { usePlayerStore } from "../store/player";
-import { useLikesStore } from "../store/likes";
+import { useFavoritesController } from "../hooks/useFavorites";
 import { fmt } from "./format";
 import { coverFor } from "./palette";
 import { trackCoverSrc, trackSeed } from "../hooks/useLibrary";
@@ -26,8 +26,8 @@ export function PlayerBar() {
   const store = usePlayerStore;
 
   const track = queue[index] ?? null;
-  const liked = useLikesStore((s) => (track ? s.liked.has(track.id) : false));
-  const toggleLike = useLikesStore((s) => s.toggle);
+  const { ids: likedIds, toggle: toggleLike } = useFavoritesController();
+  const liked = track ? likedIds.has(track.id) : false;
 
   // Load a new source whenever the current track changes.
   useEffect(() => {
@@ -108,7 +108,7 @@ export function PlayerBar() {
         </div>
         <button
           className={"np__like" + (liked ? " on" : "")}
-          onClick={() => toggleLike(track.id)}
+          onClick={() => toggleLike(track)}
           aria-label="Like"
         >
           <Icon name={liked ? "heartFill" : "heart"} />

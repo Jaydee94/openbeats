@@ -1,6 +1,6 @@
 import { useNavigate, useOutletContext } from "react-router-dom";
 import { usePlayerStore } from "../store/player";
-import { useLikesStore } from "../store/likes";
+import { useFavoritesController } from "../hooks/useFavorites";
 import { useLibrary, type Album } from "../hooks/useLibrary";
 import { AlbumCard } from "../design/AlbumCard";
 import { SectionHead } from "../design/SectionHead";
@@ -21,8 +21,7 @@ export function Search() {
   const queue = usePlayerStore((s) => s.queue);
   const isPlaying = usePlayerStore((s) => s.isPlaying);
   const current = queue[index] ?? null;
-  const liked = useLikesStore((s) => s.liked);
-  const toggleLike = useLikesStore((s) => s.toggle);
+  const { ids: liked, toggle: toggleLike } = useFavoritesController();
 
   const openAlbum = (a: Album) => navigate(`/album/${a.id}`);
   const playAlbum = (a: Album) => playQueue(a.tracks, 0);
@@ -67,7 +66,7 @@ export function Search() {
                 liked={liked.has(t.id)}
                 middleText={t.album || "Single"}
                 onPlay={() => playQueue(songs, i)}
-                onLike={() => toggleLike(t.id)}
+                onLike={() => toggleLike(t)}
               />
             ))}
           </div>

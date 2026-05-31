@@ -56,6 +56,9 @@ export function Sidebar({
         <NavLink to="/library" className={navClass}>
           <Icon name="library" /> Library
         </NavLink>
+        <NavLink to="/liked" className={navClass}>
+          <Icon name="heartFill" /> Liked Songs
+        </NavLink>
       </nav>
 
       <div className="side-section">
