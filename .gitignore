@@ -36,4 +36,4 @@ npm-debug.log*
 *.swp
 
 # Playwright MCP session artifacts
-web/.playwright-mcp/
+.playwright-mcp/
