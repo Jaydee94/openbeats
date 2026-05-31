@@ -53,6 +53,11 @@ func (s *Server) Routes() http.Handler {
 			r.Post("/playlists", s.handleCreatePlaylist)
 			r.Get("/playlists/{id}", s.handleGetPlaylist)
 			r.Post("/playlists/{id}/tracks", s.handleAddPlaylistTrack)
+
+			// Favourites ("Liked Songs").
+			r.Get("/favorites", s.handleListFavorites)
+			r.Post("/favorites", s.handleAddFavorite)
+			r.Delete("/favorites/{trackId}", s.handleRemoveFavorite)
 		})
 	})
 

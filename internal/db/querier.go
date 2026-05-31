@@ -11,6 +11,7 @@ import (
 )
 
 type Querier interface {
+	AddFavorite(ctx context.Context, arg AddFavoriteParams) error
 	AddPlaylistTrack(ctx context.Context, arg AddPlaylistTrackParams) (PlaylistTrack, error)
 	CountUsers(ctx context.Context) (int64, error)
 	CreatePlaylist(ctx context.Context, arg CreatePlaylistParams) (Playlist, error)
@@ -21,6 +22,7 @@ type Querier interface {
 	GetTrack(ctx context.Context, id pgtype.UUID) (Track, error)
 	GetUserByID(ctx context.Context, id pgtype.UUID) (User, error)
 	GetUserByUsername(ctx context.Context, username string) (User, error)
+	ListFavoriteTracks(ctx context.Context, userID pgtype.UUID) ([]Track, error)
 	ListPlaylistTracks(ctx context.Context, playlistID pgtype.UUID) ([]ListPlaylistTracksRow, error)
 	ListPlaylistsByOwner(ctx context.Context, ownerID pgtype.UUID) ([]Playlist, error)
 	ListTracks(ctx context.Context, arg ListTracksParams) ([]Track, error)
