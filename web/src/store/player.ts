@@ -33,6 +33,7 @@ interface PlayerState {
   setVolume: (v: number) => void;
   toggleMute: () => void;
   toggleShuffle: () => void;
+  setShuffle: (v: boolean) => void;
   toggleRepeat: () => void;
 
   openNowPlaying: () => void;
@@ -107,6 +108,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
   toggleMute: () =>
     set((s) => (s.volume > 0 ? { volume: 0 } : { volume: s.prevVolume || 0.8 })),
   toggleShuffle: () => set((s) => ({ shuffle: !s.shuffle })),
+  setShuffle: (v) => set({ shuffle: v }),
   toggleRepeat: () => set((s) => ({ repeat: !s.repeat })),
 
   openNowPlaying: () => set({ npOpen: true }),

@@ -1,12 +1,14 @@
 /* OpenBeats — fullscreen Now Playing overlay */
-import { useMemo, useRef } from "react";
+import { useMemo, useRef, useState } from "react";
 import { usePlayerStore } from "../store/player";
-import { useLikesStore } from "../store/likes";
+import { useFavoritesController } from "../hooks/useFavorites";
 import { fmt, waveHeights } from "./format";
 import { coverColors, coverFor } from "./palette";
-import { trackCoverSrc, trackSeed } from "../hooks/useLibrary";
+import { trackCoverSrc, trackSeed, useLibrary } from "../hooks/useLibrary";
 import { Cover } from "./Cover";
 import { Icon } from "./Icon";
+
+type NpTab = "queue" | "lyrics" | "related";
 
 export function NowPlaying() {
   const queue = usePlayerStore((s) => s.queue);
@@ -19,11 +21,21 @@ export function NowPlaying() {
   const store = usePlayerStore;
 
   const track = queue[index] ?? null;
-  const liked = useLikesStore((s) => (track ? s.liked.has(track.id) : false));
-  const toggleLike = useLikesStore((s) => s.toggle);
+  const { ids: likedIds, toggle: toggleLike } = useFavoritesController();
+  const liked = track ? likedIds.has(track.id) : false;
+
+  const [tab, setTab] = useState<NpTab>("queue");
+  const { tracks: allTracks } = useLibrary();
 
   const waveRef = useRef<HTMLDivElement>(null);
   const bars = useMemo(() => (track ? waveHeights(track.id, 64) : []), [track]);
+  const related = useMemo(
+    () =>
+      track
+        ? allTracks.filter((t) => t.id !== track.id && t.artist && t.artist === track.artist)
+        : [],
+    [allTracks, track],
+  );
 
   if (!track) return null;
 
@@ -69,7 +81,7 @@ export function NowPlaying() {
               </div>
               <button
                 className={"np-detail__like" + (liked ? " on" : "")}
-                onClick={() => toggleLike(track.id)}
+                onClick={() => toggleLike(track)}
                 aria-label="Like"
               >
                 <Icon name={liked ? "heartFill" : "heart"} />
@@ -109,23 +121,57 @@ export function NowPlaying() {
 
       <div className="np-right">
         <div className="np-right__tabs">
-          <div className="np-tab active">Queue</div>
-          <div className="np-tab">Lyrics</div>
-          <div className="np-tab">Related</div>
+          <button className={"np-tab" + (tab === "queue" ? " active" : "")} onClick={() => setTab("queue")}>
+            Queue
+          </button>
+          <button className={"np-tab" + (tab === "lyrics" ? " active" : "")} onClick={() => setTab("lyrics")}>
+            Lyrics
+          </button>
+          <button className={"np-tab" + (tab === "related" ? " active" : "")} onClick={() => setTab("related")}>
+            Related
+          </button>
         </div>
-        <div className="np-queue">
-          <div className="np-queue__label">Now playing</div>
-          <QueueRow track={track} active />
-          <div className="np-queue__label" style={{ marginTop: 10 }}>
-            Next up
+
+        {tab === "queue" && (
+          <div className="np-queue">
+            <div className="np-queue__label">Now playing</div>
+            <QueueRow track={track} active />
+            <div className="np-queue__label" style={{ marginTop: 10 }}>
+              Next up
+            </div>
+            {queue.map(
+              (t, i) =>
+                i > index && (
+                  <QueueRow key={t.id + i} track={t} onClick={() => store.getState().jumpTo(i)} />
+                ),
+            )}
           </div>
-          {queue.map(
-            (t, i) =>
-              i > index && (
-                <QueueRow key={t.id + i} track={t} onClick={() => store.getState().jumpTo(i)} />
-              ),
-          )}
-        </div>
+        )}
+
+        {tab === "lyrics" && (
+          <div className="np-queue">
+            <div className="empty-state" style={{ padding: "32px 8px" }}>
+              <div className="empty-state__title">No lyrics available</div>
+              Lyrics aren’t provided for this track.
+            </div>
+          </div>
+        )}
+
+        {tab === "related" && (
+          <div className="np-queue">
+            <div className="np-queue__label">More from {track.artist || "this artist"}</div>
+            {related.length === 0 ? (
+              <div className="empty-state" style={{ padding: "32px 8px" }}>
+                <div className="empty-state__title">Nothing related yet</div>
+                No other tracks from this artist in your library.
+              </div>
+            ) : (
+              related.map((t) => (
+                <QueueRow key={t.id} track={t} onClick={() => store.getState().playTrack(t)} />
+              ))
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

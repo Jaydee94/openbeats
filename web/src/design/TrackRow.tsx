@@ -5,6 +5,7 @@ import { coverFor } from "./palette";
 import { trackCoverSrc, trackSeed } from "../hooks/useLibrary";
 import { Cover } from "./Cover";
 import { Icon } from "./Icon";
+import { TrackMenu } from "../components/TrackMenu";
 
 export function TrackRow({
   track,
@@ -68,6 +69,7 @@ export function TrackRow({
           <Icon name={liked ? "heartFill" : "heart"} style={{ width: 15, height: 15 }} />
         </button>
         <span style={{ width: 34, textAlign: "right" }}>{fmt(track.duration_seconds)}</span>
+        <TrackMenu track={track} />
       </div>
     </div>
   );

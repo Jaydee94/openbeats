@@ -1,7 +1,7 @@
 import { useParams } from "react-router-dom";
 import type { Track } from "../api/types";
 import { usePlayerStore } from "../store/player";
-import { useLikesStore } from "../store/likes";
+import { useFavorites, useFavoritesController } from "../hooks/useFavorites";
 import { usePlaylist } from "../hooks/usePlaylists";
 import { useLibrary } from "../hooks/useLibrary";
 import { coverColors, coverFor } from "../design/palette";
@@ -23,12 +23,12 @@ interface CollectionViewProps {
 
 function CollectionView({ kind, title, owner, meta, tracks, pal, motif, coverSrc }: CollectionViewProps) {
   const playQueue = usePlayerStore((s) => s.playQueue);
+  const setShuffle = usePlayerStore((s) => s.setShuffle);
   const toggle = usePlayerStore((s) => s.toggle);
   const queue = usePlayerStore((s) => s.queue);
   const index = usePlayerStore((s) => s.index);
   const isPlaying = usePlayerStore((s) => s.isPlaying);
-  const liked = useLikesStore((s) => s.liked);
-  const toggleLike = useLikesStore((s) => s.toggle);
+  const { ids: liked, toggle: toggleLike } = useFavoritesController();
 
   const current = queue[index] ?? null;
   const isThis = tracks.some((t) => current && t.id === current.id);
@@ -38,6 +38,12 @@ function CollectionView({ kind, title, owner, meta, tracks, pal, motif, coverSrc
   const playCollection = () => {
     if (isThis) toggle();
     else playQueue(tracks, 0);
+  };
+
+  const playShuffled = () => {
+    if (tracks.length === 0) return;
+    setShuffle(true);
+    playQueue(tracks, Math.floor(Math.random() * tracks.length));
   };
 
   return (
@@ -77,7 +83,7 @@ function CollectionView({ kind, title, owner, meta, tracks, pal, motif, coverSrc
               <Icon name={isThis && isPlaying ? "pause" : "play"} />
               {isThis && isPlaying ? "Pause" : "Play"}
             </button>
-            <button className="ghost-btn">
+            <button className="ghost-btn" onClick={playShuffled} disabled={tracks.length === 0}>
               <Icon name="shuffle" /> Shuffle
             </button>
           </div>
@@ -110,7 +116,7 @@ function CollectionView({ kind, title, owner, meta, tracks, pal, motif, coverSrc
                 liked={liked.has(t.id)}
                 middleText={kind === "album" ? playCount(t.id) : t.album || "Single"}
                 onPlay={() => playQueue(tracks, i)}
-                onLike={() => toggleLike(t.id)}
+                onLike={() => toggleLike(t)}
               />
             ))}
           </div>
@@ -145,6 +151,25 @@ export function AlbumView() {
       pal={album.pal}
       motif={album.motif}
       coverSrc={album.coverSrc}
+    />
+  );
+}
+
+export function LikedView() {
+  const { data: tracks, isLoading } = useFavorites();
+  const { pal, motif } = coverFor("liked::songs");
+
+  if (isLoading) return <div className="page">Loading…</div>;
+
+  return (
+    <CollectionView
+      kind="playlist"
+      title="Liked Songs"
+      owner="OpenBeats"
+      meta="Your favourites"
+      tracks={tracks ?? []}
+      pal={pal}
+      motif={motif}
     />
   );
 }
